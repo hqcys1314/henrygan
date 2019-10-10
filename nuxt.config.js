@@ -12,7 +12,7 @@ export default {
       { hid: 'description', name: 'description', content: process.env.npm_package_description || '' }
     ],
     link: [
-      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' }
+      { rel: 'icon', type: 'image/x-icon', href: '/favicon.ico' },
     ]
   },
   /*
@@ -23,7 +23,11 @@ export default {
   ** Global CSS
   */
   css: [
-    'element-ui/lib/theme-chalk/index.css'
+    //'element-ui/lib/theme-chalk/index.css',
+    {
+      src:'~assets/common/common.less',
+      lang:'less'
+    }
   ],
   /*
   ** Plugins to load before mounting the App
@@ -51,5 +55,8 @@ export default {
     */
     extend (config, ctx) {
     }
+  },
+  router: {
+    base: "/" //此为根目录，如果有具体目录需求按实际情况写
   }
-}
+  }
