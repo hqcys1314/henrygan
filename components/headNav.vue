@@ -2,41 +2,34 @@
   <div class="H-header">
     <ul class="hh-left">
       <li class="line">&nbsp;</li>
-      <li><a class="active" href="/">{{titleList[0]}}</a></li>
-      <li><a class="active" href="/">{{titleList[1]}}</a></li>
+      <li><a class="active" href="/">{{leftList[0]}}</a></li>
+      <li><a class="active" href="/">{{leftList[1]}}</a></li>
     </ul>
     <ul class="hh-center">
-      <li :class="{'active':isActive==titleList[2]}" v-on:click="chooseNav(titleList[2])">{{titleList[2]}}</li>
-      <li :class="{'active':isActive==titleList[3]}" v-on:click="chooseNav(titleList[3])">{{titleList[3]}}</li>
-      <li :class="{'active':isActive==titleList[4]}" v-on:click="chooseNav(titleList[4])">{{titleList[4]}}</li>
 
-      <li :class="{'active':isActive==titleList[5]}" v-on:click="chooseNav(titleList[5])">{{titleList[5]}}</li>
-      <li :class="{'active':isActive==titleList[6]}" v-on:click="chooseNav(titleList[6])">{{titleList[6]}}</li>
-      <li :class="{'active':isActive==titleList[7]}" v-on:click="chooseNav(titleList[7])">{{titleList[7]}}</li>
-
-      <li :class="{'active':isActive==titleList[8]}" v-on:click="chooseNav(titleList[8])">{{titleList[8]}}</li>
-      <li :class="{'active':isActive==titleList[9]}" v-on:click="chooseNav(titleList[9])">{{titleList[9]}}</li>
+      <li v-for="item in titleList" :class="{'active':isActive==item.media_type}" v-on:click="chooseNav(item.media_type)">{{item.media_type}}</li>
     </ul>
     <ul class="hh-right">
-      <li :class="{'active':isActive==titleList[10]}" v-on:click="chooseNavR(titleList[10])">{{titleList[10]}}</li>
-      <li :class="{'active':isActive==titleList[10]}" v-on:click="chooseNavR(titleList[10])">{{titleList[11]}}</li>
-      <li :class="{'active':isActive==titleList[11]}" v-on:click="chooseNavR(titleList[11])">{{titleList[12]}}</li>
-      <li :class="{'active':isActive==titleList[12]}" v-on:click="chooseNavR(titleList[12])">{{titleList[13]}}</li>
+      <li :class="{'active':isActive==rightList[0]}" v-on:click="chooseNavR(rightList[0])">{{rightList[0]}}</li>
+      <li :class="{'active':isActive==rightList[1]}" v-on:click="chooseNavR(rightList[1])">{{rightList[1]}}</li>
+      <li :class="{'active':isActive==rightList[2]}" v-on:click="chooseNavR(rightList[2])">{{rightList[2]}}</li>
+      <li :class="{'active':isActive==rightList[3]}" v-on:click="chooseNavR(rightList[3])">{{rightList[3]}}</li>
     </ul>
   </div>
 </template>
 <script>
   export default {
     name:'headNav',
-    props:['pageStep'],
+    props:['pageStep','titleList'],
     created(){
       this.isActive=this.pageStep;
+
     },
     data(){
       return{
         isActive:'',
-        titleList:['HENRY GAN','PHOTOGRAPHY','COMMERCIAL','PERSONAL','TRAVEL',
-          'FASHION&BEAUTY','LANDSCAPE','EXHIBITION','UNDERWATER','NONCAM','MAKING OF','CONTACT','PROFILE','AGENT']
+        leftList:['HENRY GAN','PHOTOGRAPHY'],
+        rightList:['MAKING OF','CONTACT','PROFILE','AGENT']
       }
     },
     methods:{
@@ -52,18 +45,17 @@
     watch:{
       pageStep(){
         this.isActive=this.pageStep;
-
       }
     }
   }
 </script>
 <style lang="less">
-  .H-header ul li:hover, .H-header ul li .active{
-    color: #F0F0F0;
+  .H-header ul li:hover, .H-header ul li.active,a.active{
+    color: #0f2d10;font-weight: bold;
   }
   .H-header{
     display:-webkit-flex;font-size: 12px;line-height: 24px;height: 80px;
-    display:flex;
+    display:flex;color: #2F323D;
     flex-direction:row;
     justify-content:space-between;
     .hh-left{

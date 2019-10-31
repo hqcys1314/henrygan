@@ -33,7 +33,9 @@ export default {
   ** Plugins to load before mounting the App
   */
   plugins: [
-    '@/plugins/element-ui'
+    //'@/plugins/element-ui',
+    { src: '~/plugins/axios', ssr: false }
+
   ],
   /*
   ** Nuxt.js dev-modules
@@ -44,12 +46,18 @@ export default {
   ** Nuxt.js modules
   */
   modules: [
+    '@nuxtjs/axios'
   ],
+  axios: {
+    proxy: true, // 表示开启代理
+    // prefix: '/api', // 表示给请求url加个前缀 /api
+    credentials: true // 表示跨域请求时是否需要使用凭证
+  },
   /*
   ** Build configuration
   */
   build: {
-    transpile: [/^element-ui/],
+    //transpile: [/^element-ui/],
     /*
     ** You can extend webpack config here
     */
@@ -58,5 +66,12 @@ export default {
   },
   router: {
     base: "/" //此为根目录，如果有具体目录需求按实际情况写
-  }
+  },
+  proxy: {
+
+    '/api': {
+      target: 'http://cms.lixuan222.com/', // 目标接口域名
+      changeOrigin: true
+    }
+  },
   }

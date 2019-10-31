@@ -1,9 +1,10 @@
 <template>
+  <div class="bg">
   <div class="container">
-    <headNav :pageStep="pageStep" @jumpStep="jumpStep" @jumpStepR="jumpStepR"></headNav>
+    <headNav :pageStep="pageStep" :titleList="titleList" @jumpStep="jumpStep" @jumpStepR="jumpStepR"></headNav>
     <div class="h-contentText">
         <div class="mo" v-if="pageStep=='MAKING OF'">
-          <contentLayout :imgList="vedioList" type="vedio" @bigV="bigV"></contentLayout>
+          <contentLayout :imgList="imgList" type="vedio" @bigV="bigV"></contentLayout>
         </div>
         <div class="ct" v-if="pageStep=='CONTACT'">
           <p>MOBILE</p>
@@ -93,23 +94,25 @@
     <div class="bigVedioMc" v-show="bigVedioShow"></div>
     <div class="bigVedio" v-show="bigVedioShow">
       <p class="close"><img src="@/assets/common/img/close.png" alt="" v-on:click="close"></p>
-      <div class="conImg"  :style="{'margin-top':topv}" ref="topInfoDt">
-        <video  autoplay="" controls="" preload="none" width="569" height="320"
-                :poster="nowVedio.vedioUrl" data-setup="{}">
-          <source :src="nowVedio.vedioUrl" type="video/mp4">
-          <!--<![endif]-->
-          <!--[if lt IE 9]>
-          <object width="569" height="320" class="video" type="application/x-shockwave-flash" :data="nowVedio.swfUrl">
-            <param name="movie" :value="nowVedio.swfUrl" />
-            <param name="allowFullscreen" value="true">
-            <param name="wmode" value="transparent">
-            <param name="FlashVars" :value="'videoPath='+nowVedio.vedioUrl+'&imagePath=&stageW=&stageH=&autoHide=true&autoHideTime=3&hideLogo=false&autoStart=true&volAudio=60&disableMiddleButton=false&playSounds=false&soundBarColor=0x000000&barColor=0x6666666&barShadowColor=0x000000&subbarColor=0x666666&extendVideo=true&wtId=2013-04-once-upon-a-time-by-karl-lagerfeld-movie-trailer'">
-          </object>
-          <![endif]-->
+      <div class="conImg" ref="topInfoDt">
+        <video  autobuffer autoloop loop controls  preload="none" width="569" height="320"
+                :poster="nowVedio.titlePageUrl" >
+          <source :src="nowVedio.url" type="video/mp4">
+          Your browser does not support the video tag.
+          <!--&lt;!&ndash;<![endif]&ndash;&gt;-->
+          <!--&lt;!&ndash;[if lt IE 9]>-->
+          <!--<object width="569" height="320" class="video" type="application/x-shockwave-flash" :data="nowVedio.swfUrl">-->
+            <!--<param name="movie" :value="nowVedio.swfUrl" />-->
+            <!--<param name="allowFullscreen" value="true">-->
+            <!--<param name="wmode" value="transparent">-->
+            <!--<param name="FlashVars" :value="'videoPath='+nowVedio.url+'&imagePath=&stageW=&stageH=&autoHide=true&autoHideTime=3&hideLogo=false&autoStart=true&volAudio=60&disableMiddleButton=false&playSounds=false&soundBarColor=0x000000&barColor=0x6666666&barShadowColor=0x000000&subbarColor=0x666666&extendVideo=true&wtId=2013-04-once-upon-a-time-by-karl-lagerfeld-movie-trailer'">-->
+          <!--</object>-->
+          <!--<![endif]&ndash;&gt;-->
         </video>
       </div>
 
     </div>
+  </div>
   </div>
 </template>
 
@@ -121,20 +124,51 @@
     data(){
       return{
         pageStep:'CONTACT',
-        vedioList:'',
+        imgList:[],
         bigVedioShow:false,
         nowVedio:'',
         topv:'',
+        titleList:[],
+        isImgShow:true,
       }
     },
     created(){
       this.pageStep=this.$route.query.step;
-      this.vedioList=[{'vedioUrl':'http://www.henrygan.com/content/uploads/videos/1.mp4','imgUrl':'https://static.facebank.cn/static/webFront/index2018/img/banner.jpg','swfUrl':'http://chanel-news.chanel.cn/etc/designs/chanel/chanelnews/swf/flvPlayer.swf'}]
+      this.$axios.get('/api/media/getMediaType').then((res)=>{
+        if(res.data.code==200) {
+          this.titleList =res.data.data;
+        }
+      }).catch(function(err) {
+        console.log(err);
+      })
+      if(this.pageStep=='MAKING OF') {
+        this.getImgList('9');
+
+      };
     },
     components: {
       headNav,contentLayout
     },
     methods:{
+      getImgList(id){
+        this.isImgShow=false;
+        var params = {"mediaTypeId":id,"page":this.pageNum};
+        this.$axios.post('/api/media/getVideo',  params).then((res)=>{
+          if(res.data.code==200) {
+            if(res.data.data&&res.data.data.length>0){
+              this.isImgShow=true;
+              this.pageNum++;
+              this.imgList =this.imgList.concat(res.data.data);
+            }else {
+              this.isImgShow=false;
+            }
+          }else{
+            this.isImgShow=false;
+          }
+        }).catch(function(err) {
+          console.log(err);
+        })
+      },
       jumpStep(step) { // 路由
         this.$router.push({
           path: '/content',
@@ -153,9 +187,9 @@
         })
         this.pageStep = step
       },
-      bigV(nowVedio){
-        this.nowVedio=nowVedio;
-        this.calTopV();
+      bigV(bigVedio){
+        this.nowVedio=bigVedio;
+        //this.calTopV();
         this.bigVedioShow=true;
       },
       calTopV(){
@@ -171,6 +205,9 @@
     watch:{
       '$route' (to,from) {
         this.pageStep = to.query.step
+      },
+      pageStep(){
+
       }
     }
   }
@@ -203,23 +240,33 @@
     }
 
     .bigVedioMc{
-      position: fixed;z-index: 1;
+      position: fixed;z-index: 2;
       top: 0;left: 0;
-      opacity: 0.9;
+      opacity: 0.8;
       width: 100%;
       height: 100%;
-      background-color: #111;
+      background-color: #000000;
     }
     .bigVedio{
-      position: fixed;z-index: 2;
+      position: fixed;z-index: 3;
       top: 0;left: 0; width: 100%;
       height: 100%;
-      .close{text-align: right;margin-top: 10px;margin-right: 10px;}
-      .conImg{
-        width: 1000px;text-align: center;
-        top: 50%;position: fixed;    left: 50%;
+      .close{text-align: right;margin-top: 10px;margin-right: 10px;img{width: 26px;}}
+      .conImg {
+        width: 1000px;
+        text-align: center;
+        top: 50%;
+        position: fixed;
+        left: 50%;
         margin-left: -500px;
-        img{width: 100%;}
+        transform: translateY(-50%);
+        -ms-transform: translateY(-50%); /* IE 9 */
+        -moz-transform: translateY(-50%); /* Firefox */
+        -webkit-transform: translateY(-50%); /* Safari 和 Chrome */
+        -o-transform: translateY(-50%); /* Opera */
+        img {
+          width: 100%;
+        }
       }
     }
   }

@@ -1,17 +1,21 @@
 <template>
-  <div class="container">
-     <headNav :pageStep="pageStep" @jumpStep="jumpStep" @jumpStepR="jumpStepR"></headNav>
-     <contentLayout :imgList="imgList" type="img" @big="big"></contentLayout>
-     <div class="bigImgMc" v-show="bigImgShow"></div>
-     <div class="bigImg" v-show="bigImgShow">
-        <p class="close"><img src="@/assets/common/img/close.png" alt="" v-on:click="close"></p>
-        <div class="jt jtLeft" @click="prev"></div>
-        <div class="conImg"  :style="{'margin-top':topv}" ref="topInfo">
-          <img :src="bigImgUrl" alt="" >
-        </div>
-       <div class="jt jtRight" @click="next"></div>
+  <div class="bg">
+    <div class="container">
+       <headNav :pageStep="pageStep" :titleList="titleList" @jumpStep="jumpStep" @jumpStepR="jumpStepR"></headNav>
+      <div class="pbl"  ref="contentLayout">
+        <contentLayout :imgList="imgList" type="img" @big="big"></contentLayout>
+      </div>
+       <div class="bigImgMc" v-show="bigImgShow"></div>
+       <div class="bigImg" v-show="bigImgShow">
+          <p class="close"><img src="@/assets/common/img/close.png" alt="" v-on:click="close"></p>
+          <div class="jt jtLeft" @click="prev"></div>
+          <div class="conImg" ref="topInfo">
+            <img :src="bigImgUrl" alt="" >
+          </div>
+         <div class="jt jtRight" @click="next"></div>
 
-     </div>
+       </div>
+    </div>
   </div>
 </template>
 
@@ -28,25 +32,70 @@ export default {
       bigImgUrl:'',
       topv:'50%',
       nowIndex:'0',
+      titleList:[],
+      pageNum:'1',
+      id:'',
+      isImgShow:true,
+
     }
   },
   created(){
     this.pageStep=this.$route.query.step;
-    this.imgList=[{"start_time":"2019-05-23 00:00:00","image_link":"https://facebank-static.oss-cn-hangzhou.aliyuncs.com/facebank/mic/test/1565338566094partnerInvitation.html","goal":"","shareicon":"","image_url":"https://static.facebank.cn/static/webFront/index2018/img/banner.jpg","bannertitle":"合伙人邀请攻略","end_time":"","weight":"1","sharetitle":"合伙人邀请攻略","operationtype":"wap","shareurl":"","sharecontent":""},{"image_link":"https://cms.facebank.cn/timeDepositAsk.html","goal":"","shareicon":"","image_url":"https://facebank-static.oss-cn-hangzhou.aliyuncs.com/facebank/mic/test/15619517759183f3b1078d9461b8355402f4b497eeb1.jpg","bannertitle":"月月笑常见问题","weight":"3","sharetitle":"","operationtype":"wap","shareurl":"","sharecontent":""},{"image_link":"https://cms.facebank.cn/notify201905301310.html","goal":"","shareicon":"","image_url":"https://facebank-static.oss-cn-hangzhou.aliyuncs.com/facebank/mic/test/1559540647509回款.jpg","bannertitle":"回款为什么第二个工作日才到账","weight":"5","sharetitle":"","operationtype":"wap","shareurl":"","sharecontent":""},{"image_link":"https://cms.facebank.cn/daliangshangongyi.html","goal":"","shareicon":"","image_url":"https://facebank-static.oss-cn-hangzhou.aliyuncs.com/facebank/mic/test/1557997698757公益轮播图.jpg","bannertitle":"关注大凉山背后的孩子们","weight":"5","sharetitle":"","operationtype":"wap","shareurl":"","sharecontent":""},{"image_link":"https://cms.facebank.cn/oneMinute.html","goal":"","shareicon":"","image_url":"https://facebank-static.oss-cn-hangzhou.aliyuncs.com/facebank/mic/test/1559791057524一分钟了解笑脸轮播图.jpg ","bannertitle":"一分钟了解笑脸金融","weight":"6","sharetitle":"","operationtype":"wap","shareurl":"","sharecontent":""}];
+    this.$axios.get('/api/media/getMediaType').then((res)=>{
+      if(res.data.code==200) {
+        this.titleList =res.data.data;
+        this.id= this.titleList.filter(item => {return item.media_type==this.pageStep;})[0].id;
+        this.getImgList(this.id);
+      }
+    }).catch(function(err) {
+      console.log(err);
+    })
+
+
+  },
+  mounted(){
+    this.$refs.contentLayout.addEventListener('scroll', ()=>{
+      var domHeight=this.$refs.contentLayout.getElementsByTagName('ul')[0].clientHeight;
+      var scrollTop=this.$refs.contentLayout.scrollTop;
+      var seeHeight=this.$refs.contentLayout.clientHeight;
+      if(domHeight-scrollTop<seeHeight*1+0){
+        if(!this.isImgShow) return;
+        this.getImgList(this.id);
+      }
+    })
   },
   components: {
     headNav,contentLayout
   },
   methods:{
+    getImgList(id){
+      this.isImgShow=false;
+      var params = {"mediaTypeId":id,"page":this.pageNum};
+      this.$axios.post('/api/media/getPicture',  params).then((res)=>{
+        if(res.data.code==200) {
+          if(res.data.data&&res.data.data.length>0){
+            this.isImgShow=true;
+            this.pageNum++;
+            this.imgList =this.imgList.concat(res.data.data);
+          }else {
+            this.isImgShow=false;
+          }
+        }else{
+          this.isImgShow=false;
+        }
+      }).catch(function(err) {
+        console.log(err);
+      })
+    },
     prev(){
-      this.bigImgUrl=this.imgList[(this.nowIndex-1)>=0?(this.nowIndex-1):0].image_url;
-      this.calTopV();
+      this.bigImgUrl=this.imgList[(this.nowIndex-1)>=0?(this.nowIndex-1):0].url;
+      //this.calTopV();
       if(this.nowIndex-1>=0) this.nowIndex--;
 
 },
     next(){
-      this.bigImgUrl=this.imgList[(this.nowIndex*1+1<this.imgList.length)?(this.nowIndex*1+1):(this.imgList.length-1)].image_url;
-      this.calTopV();
+      this.bigImgUrl=this.imgList[(this.nowIndex*1+1<this.imgList.length)?(this.nowIndex*1+1):(this.imgList.length-1)].url;
+      //this.calTopV();
       if(this.nowIndex*1+1<this.imgList.length)  this.nowIndex++;
     },
     jumpStep(step) { // 路由
@@ -70,7 +119,7 @@ export default {
     big(url,index){
       this.bigImgUrl=url;
       this.nowIndex=index;
-      this.calTopV();
+      //this.calTopV();
       this.bigImgShow=true;
     },
     calTopV(){
@@ -86,6 +135,14 @@ export default {
   watch:{
     '$route' (to,from) {
       this.pageStep = to.query.step
+    },
+    pageStep(){
+      if(!this.pageStep) this.pageStep="COMMERCIAL";
+      this.imgList=[];
+      this.pageNum=1;
+      var item= this.titleList.filter(item => {return item.media_type==this.pageStep;});
+      if(item[0]&&item[0]!='') this.id=item[0].id;
+      this.getImgList(this.id);
     }
   }
 }
@@ -98,20 +155,29 @@ export default {
     .bigImgMc{
       position: fixed;z-index: 1;
       top: 0;left: 0;
-      opacity: 0.9;
+      opacity: 0.3;
       width: 100%;
       height: 100%;
-      background-color: #111;
+      background-color: #946f6f;
+
     }
     .bigImg{
       position: fixed;z-index: 2;
       top: 0;left: 0; width: 100%;
-      height: 100%;
-      .close{text-align: right;margin-top: 10px;margin-right: 10px;}
+      height: 100%;      background-color: #000000;
+
+      .close{text-align: right;margin-top: 10px;margin-right: 10px;
+        img{width: 26px;}
+      }
       .conImg{
         width: 1000px;text-align: center;
         top: 50%;position: fixed;    left: 50%;
         margin-left: -500px;
+        transform:translateY(-50%);
+        -ms-transform:translateY(-50%); /* IE 9 */
+        -moz-transform:translateY(-50%); /* Firefox */
+        -webkit-transform:translateY(-50%); /* Safari 和 Chrome */
+        -o-transform:translateY(-50%); /* Opera */
         img{width: 100%;}
       }
       .jt{background: url(../assets/common/img/arrow.png);
