@@ -5,7 +5,7 @@
           <img :src="t.titlePageUrl" alt="">
         </li>
       </ul>
-      <ul v-if="type=='vedio'">{{imgList.length}}
+      <ul v-if="type=='vedio'">
         <li v-for="t in imgList" v-on:click="bigV(t)">
           <img :src="t.titlePageUrl" alt="">
         </li>

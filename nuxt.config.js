@@ -34,8 +34,8 @@ export default {
   */
   plugins: [
     //'@/plugins/element-ui',
-    { src: '~/plugins/axios', ssr: false }
-
+    { src: '~/plugins/axios', ssr: false },
+    { src: '@/plugins/videoplayer', ssr: false }
   ],
   /*
   ** Nuxt.js dev-modules

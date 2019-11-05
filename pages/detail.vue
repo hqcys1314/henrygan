@@ -91,31 +91,34 @@
           <p>www.ohlsson.de</p>
         </div>
     </div>
-    <div class="bigVedioMc" v-show="bigVedioShow"></div>
-    <div class="bigVedio" v-show="bigVedioShow">
+    <div class="bigVedioMc" v-if="bigVedioShow"></div>
+    <div class="bigVedio" v-if="bigVedioShow">
       <p class="close"><img src="@/assets/common/img/close.png" alt="" v-on:click="close"></p>
       <div class="conImg" ref="topInfoDt">
-        <video  autobuffer autoloop loop controls  preload="none" width="569" height="320"
-                :poster="nowVedio.titlePageUrl" >
-          <source :src="nowVedio.url" type="video/mp4">
-          Your browser does not support the video tag.
-          <!--&lt;!&ndash;<![endif]&ndash;&gt;-->
-          <!--&lt;!&ndash;[if lt IE 9]>-->
-          <!--<object width="569" height="320" class="video" type="application/x-shockwave-flash" :data="nowVedio.swfUrl">-->
-            <!--<param name="movie" :value="nowVedio.swfUrl" />-->
-            <!--<param name="allowFullscreen" value="true">-->
-            <!--<param name="wmode" value="transparent">-->
-            <!--<param name="FlashVars" :value="'videoPath='+nowVedio.url+'&imagePath=&stageW=&stageH=&autoHide=true&autoHideTime=3&hideLogo=false&autoStart=true&volAudio=60&disableMiddleButton=false&playSounds=false&soundBarColor=0x000000&barColor=0x6666666&barShadowColor=0x000000&subbarColor=0x666666&extendVideo=true&wtId=2013-04-once-upon-a-time-by-karl-lagerfeld-movie-trailer'">-->
-          <!--</object>-->
-          <!--<![endif]&ndash;&gt;-->
-        </video>
+
+          <div
+            v-video-player:myVideoPlayer="playerOptions"
+            :playsinline="playsinline"
+            class="video-player-box vjs-big-play-centered"
+            @play="onPlayerPlay($event)"
+            @pause="onPlayerPause($event)"
+            @ended="onPlayerEnded($event)"
+            @loadeddata="onPlayerLoadeddata($event)"
+            @waiting="onPlayerWaiting($event)"
+            @playing="onPlayerPlaying($event)"
+            @timeupdate="onPlayerTimeupdate($event)"
+            @canplay="onPlayerCanplay($event)"
+            @canplaythrough="onPlayerCanplaythrough($event)"
+            @ready="playerReadied"
+            @statechanged="playerStateChanged($event)"/>
+
       </div>
 
     </div>
   </div>
   </div>
 </template>
-
+<style src="@/assets/common/css/video-js.css"></style>
 <script>
   import headNav from '~/components/headNav.vue'
   import contentLayout from '~/components/contentLayout.vue'
@@ -130,6 +133,22 @@
         topv:'',
         titleList:[],
         isImgShow:true,
+        playsinline: true,
+        playerOptions: {
+          muted: true,
+          controls: true,
+          language: 'lang',
+          playbackRates: [0.7, 1.0, 1.5, 2.0],  //播放速率
+          sources: [
+            {
+              type: 'video/mp4',
+              src: ''  //视频流地址
+            }
+          ],
+          hls: true,  //启用hls？
+          fluid: true,  //设置播放器为流体  宽度为外层盒子大小  ps：想设置width：100%找不到方法？这个就对了
+          poster: ""
+        }
       }
     },
     created(){
@@ -189,6 +208,9 @@
       },
       bigV(bigVedio){
         this.nowVedio=bigVedio;
+        this.playerOptions.sources[0].src=bigVedio.url;
+        this.playerOptions.poster=bigVedio.titlePageUrl;
+
         //this.calTopV();
         this.bigVedioShow=true;
       },
@@ -200,6 +222,42 @@
       },
       close(){
         this.bigVedioShow=false;
+      },
+      // listen event
+      onPlayerPlay(player) {
+        // console.log('player play!', player)
+      },
+      onPlayerPause(player) {
+        // console.log('player pause!', player)
+      },
+      onPlayerEnded(player) {
+        // console.log('player ended!', player)
+      },
+      onPlayerLoadeddata(player) {
+        // console.log('player Loadeddata!', player)
+      },
+      onPlayerWaiting(player) {
+        // console.log('player Waiting!', player)
+      },
+      onPlayerPlaying(player) {
+        // console.log('player Playing!', player)
+      },
+      onPlayerTimeupdate(player) {
+        // console.log('player Timeupdate!', player.currentTime())
+      },
+      onPlayerCanplay(player) {
+        // console.log('player Canplay!', player)
+      },
+      onPlayerCanplaythrough(player) {
+        // console.log('player Canplaythrough!', player)
+      },
+      // or listen state event
+      playerStateChanged(playerCurrentState) {
+        // console.log(playerCurrentState)
+      },
+      // player is ready
+      playerReadied(player) {
+        // console.log('example 01: the player is readied', player)
       }
     },
     watch:{

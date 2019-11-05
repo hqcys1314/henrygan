@@ -5,8 +5,8 @@
       <div class="pbl"  ref="contentLayout">
         <contentLayout :imgList="imgList" type="img" @big="big"></contentLayout>
       </div>
-       <div class="bigImgMc" v-show="bigImgShow"></div>
-       <div class="bigImg" v-show="bigImgShow">
+       <div class="bigImgMc" v-if="bigImgShow"></div>
+       <div class="bigImg" v-if="bigImgShow">
           <p class="close"><img src="@/assets/common/img/close.png" alt="" v-on:click="close"></p>
           <div class="jt jtLeft" @click="prev"></div>
           <div class="conImg" ref="topInfo">

@@ -59,13 +59,13 @@
     flex-direction:row;
     justify-content:space-between;
     .hh-left{
-      width: 200px;
+      width: 202px;
       .line{    width: 125px;height: 18px;
 
         border-top: 7px #D9D9D9 solid;}
     }
-    .hh-center{width: 500px;margin-top: 15px;
-      li{width: 33.33%;float: left;}
+    .hh-center{width: 498px;margin-top: 15px;
+      li{width: 166px;float: left;}
     }
     .hh-right{width: 200px;margin-left: 80px;margin-top: 15px;
       li{width: 50%;float: left;}
