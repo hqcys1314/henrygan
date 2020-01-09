@@ -2,8 +2,25 @@
   <div class="bg">
     <div class="container">
        <headNav :pageStep="pageStep" :titleList="titleList" @jumpStep="jumpStep" @jumpStepR="jumpStepR"></headNav>
-      <div class="pbl"  ref="contentLayout">
-        <contentLayout :imgList="imgList" type="img" @big="big"></contentLayout>
+      <div class="pbl">
+        <div class="H-content infinite-list-wrapper" style="overflow:auto">
+          <!--infinite-scroll-disabled 表示是否禁用infinite-scroll，true表示禁用，false表示不禁用-->
+          <!--infinite-scroll 表示数据请求的方法-->
+          <!--infinite-scroll-distance 表示触发请求滚动条距离页面底部的距离-->
+
+          <ul style="margin-left: 203px;" class="list"
+              infinite-scroll-immediate="init"
+              infinite-scroll-distance="10"
+              v-infinite-scroll="loadMore"
+              infinite-scroll-disabled="disabled">
+            <li v-for="(t,index) in imgList" v-on:click="big(t.url,index)" class="list-item">
+              <img :src="t.titlePageUrl" alt="">
+            </li>
+          </ul>
+
+        </div>
+        <p v-if="loading">加载中...</p>
+        <p v-if="noMore">没有更多了</p>
       </div>
        <div class="bigImgMc" v-if="bigImgShow"></div>
        <div class="bigImg" v-if="bigImgShow">
@@ -21,7 +38,6 @@
 
 <script>
 import headNav from '~/components/headNav.vue'
-import contentLayout from '~/components/contentLayout.vue'
 
 export default {
   data(){
@@ -35,8 +51,9 @@ export default {
       titleList:[],
       pageNum:'1',
       id:'',
-      isImgShow:true,
-
+      loading:true,
+      noMore:false,
+      init:false,
     }
   },
   created(){
@@ -50,40 +67,49 @@ export default {
     }).catch(function(err) {
       console.log(err);
     })
-
-
+  },
+  computed: {
+    disabled(){
+      return this.loading||this.noMore;
+    }
   },
   mounted(){
-    this.$refs.contentLayout.addEventListener('scroll', ()=>{
-      var domHeight=this.$refs.contentLayout.getElementsByTagName('ul')[0].clientHeight;
-      var scrollTop=this.$refs.contentLayout.scrollTop;
-      var seeHeight=this.$refs.contentLayout.clientHeight;
-      if(domHeight-scrollTop<seeHeight*1+0){
-        if(!this.isImgShow) return;
-        this.getImgList(this.id);
-      }
-    })
+    // this.$refs.contentLayout.addEventListener('scroll', ()=>{
+    //   var domHeight=this.$refs.contentLayout.getElementsByTagName('ul')[0].clientHeight;
+    //   var scrollTop=this.$refs.contentLayout.scrollTop;
+    //   var seeHeight=this.$refs.contentLayout.clientHeight;
+    //   if(domHeight-scrollTop<seeHeight*1+0){
+    //     if(!this.isDisable) return;
+    //     this.getImgList(this.id);
+    //   }
+    // })
   },
   components: {
-    headNav,contentLayout
+    headNav
   },
   methods:{
+    loadMore(){
+      this.loading=true;
+      this.getImgList(this.id);
+    },
     getImgList(id){
-      this.isImgShow=false;
       var params = {"mediaTypeId":id,"page":this.pageNum};
       this.$axios.post('/api/media/getPicture',  params).then((res)=>{
         if(res.data.code==200) {
           if(res.data.data&&res.data.data.length>0){
-            this.isImgShow=true;
             this.pageNum++;
+            this.noMore=false;
             this.imgList =this.imgList.concat(res.data.data);
           }else {
-            this.isImgShow=false;
+            this.noMore=true;
           }
         }else{
-          this.isImgShow=false;
+          this.noMore=true;
         }
+        this.loading=false;
       }).catch(function(err) {
+        this.loading=false;
+        this.noMore=true;
         console.log(err);
       })
     },
@@ -152,6 +178,25 @@ export default {
   .container {
     margin: 0px auto;
     width: 980px;
+
+    .pbl{
+      .H-content{
+        margin-top: 50px;overflow: hidden;height: 520px;
+        ul{overflow: hidden;}
+        ul li{
+          float: left;margin-right: 10px;margin-bottom: 5px;
+          img{width: 182px;
+            height: 121px;}
+          :hover{
+            border: 5px #6C6C6C solid;
+          }
+          :active{
+            border: 5px #6C6C6C solid;
+          }
+        }
+      }
+      p{text-align: center;}
+    }
     .bigImgMc{
       position: fixed;z-index: 1;
       top: 0;left: 0;

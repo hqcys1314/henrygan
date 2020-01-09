@@ -4,7 +4,24 @@
     <headNav :pageStep="pageStep" :titleList="titleList" @jumpStep="jumpStep" @jumpStepR="jumpStepR"></headNav>
     <div class="h-contentText">
         <div class="mo" v-if="pageStep=='MAKING OF'">
-          <contentLayout :imgList="imgList" type="vedio" @bigV="bigV"></contentLayout>
+          <div class="H-content infinite-list-wrapper" style="overflow:auto">
+            <!--infinite-scroll-disabled 表示是否禁用infinite-scroll，true表示禁用，false表示不禁用-->
+            <!--infinite-scroll 表示数据请求的方法-->
+            <!--infinite-scroll-distance 表示触发请求滚动条距离页面底部的距离-->
+
+            <ul class="list"
+                infinite-scroll-immediate="init"
+                infinite-scroll-distance="10"
+                v-infinite-scroll="loadMore"
+                infinite-scroll-disabled="disabled">
+              <li v-for="(t,index) in imgList" v-on:click="bigV(t)" class="list-item">
+                <img :src="t.titlePageUrl" alt="">
+              </li>
+            </ul>
+
+          </div>
+          <p v-if="loading">加载中...</p>
+          <p v-if="noMore">没有更多了</p>
         </div>
         <div class="ct" v-if="pageStep=='CONTACT'">
           <p>MOBILE</p>
@@ -121,7 +138,6 @@
 <style src="@/assets/common/css/video-js.css"></style>
 <script>
   import headNav from '~/components/headNav.vue'
-  import contentLayout from '~/components/contentLayout.vue'
 
   export default {
     data(){
@@ -132,7 +148,6 @@
         nowVedio:'',
         topv:'',
         titleList:[],
-        isImgShow:true,
         playsinline: true,
         playerOptions: {
           muted: true,
@@ -148,7 +163,12 @@
           hls: true,  //启用hls？
           fluid: true,  //设置播放器为流体  宽度为外层盒子大小  ps：想设置width：100%找不到方法？这个就对了
           poster: ""
-        }
+        },
+        id:'',
+        loading:true,
+        noMore:false,
+        init:false,
+        pageNum:'1',
       }
     },
     created(){
@@ -166,25 +186,36 @@
       };
     },
     components: {
-      headNav,contentLayout
+      headNav
+    },
+    computed: {
+      disabled(){
+        return this.loading||this.noMore;
+      }
     },
     methods:{
+      loadMore(){
+        this.loading=true;
+        this.getImgList(this.id);
+      },
       getImgList(id){
-        this.isImgShow=false;
         var params = {"mediaTypeId":id,"page":this.pageNum};
         this.$axios.post('/api/media/getVideo',  params).then((res)=>{
           if(res.data.code==200) {
             if(res.data.data&&res.data.data.length>0){
-              this.isImgShow=true;
               this.pageNum++;
+              this.noMore=false;
               this.imgList =this.imgList.concat(res.data.data);
             }else {
-              this.isImgShow=false;
+              this.noMore=true;
             }
           }else{
-            this.isImgShow=false;
+            this.noMore=true;
           }
+          this.loading=false;
         }).catch(function(err) {
+          this.loading=false;
+          this.noMore=true;
           console.log(err);
         })
       },
@@ -213,6 +244,7 @@
 
         //this.calTopV();
         this.bigVedioShow=true;
+        console.log(this.playerOptions.sources[0].src)
       },
       calTopV(){
         let me = this;
@@ -277,6 +309,21 @@
     width: 980px;
     .h-contentText{
       margin-left: 203px;margin-top: 50px;
+      .H-content{
+        margin-top: 50px;overflow: hidden;height: 520px;
+        ul{overflow: hidden;}
+        ul li{
+          float: left;margin-right: 10px;margin-bottom: 5px;
+          img{width: 182px;
+            height: 121px;}
+          :hover{
+            border: 5px #6C6C6C solid;
+          }
+          :active{
+            border: 5px #6C6C6C solid;
+          }
+        }
+      }
       .ct{
         line-height: 24px;
       }

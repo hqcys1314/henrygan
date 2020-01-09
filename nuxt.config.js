@@ -27,7 +27,7 @@ export default {
     {
       src:'~assets/common/common.less',
       lang:'less'
-    }
+    },{src:'element-ui/lib/theme-chalk/index.css'}
   ],
   /*
   ** Plugins to load before mounting the App
@@ -35,7 +35,9 @@ export default {
   plugins: [
     //'@/plugins/element-ui',
     { src: '~/plugins/axios', ssr: false },
-    { src: '@/plugins/videoplayer', ssr: false }
+    { src: '~/plugins/videoplayer', ssr: false },
+    {src: '~plugins/ElementUI',ssr: true},
+    {src: '~plugins/vue-infinite-scroll',ssr: false},
   ],
   /*
   ** Nuxt.js dev-modules
@@ -74,4 +76,5 @@ export default {
       changeOrigin: true
     }
   },
+  vendor:['element-ui']   //防止element-ui被打包多次
   }
