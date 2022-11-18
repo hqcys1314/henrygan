@@ -14,7 +14,7 @@
     "@nuxtjs/axios": "^5.3.6",
     "babel-polyfill": "^6.26.0",
     "element-ui": "^2.13.0",
-    "nuxt": "^2.11.0",
+    "nuxt": "^2.15.8",
     "videojs-contrib-hls": "^5.15.0",
     "vue-video-player": "^5.0.2"
   },
